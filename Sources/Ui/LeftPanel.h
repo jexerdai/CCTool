@@ -21,9 +21,11 @@ signals:
     void repoOpenRequested(const RepoInfo& repo);
     void repoRemoveRequested(int repoId);
 
-private slots:
+public slots:
     void onAddClicked();
     void onRemoveClicked();
+
+private slots:
     void onItemDoubleClicked(QListWidgetItem* item);
 
 private:

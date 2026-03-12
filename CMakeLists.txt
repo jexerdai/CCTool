@@ -7,39 +7,45 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-# 可执行文件输出到项目根目录
+# 可执行文件输出到项目根目录（MSVC 多配置生成器需要单独指定每个配置）
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR})
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Sql)
 
 set(SOURCES
-    Src/Main.cpp
-    Src/MainWindow.cpp
-    Src/Ui/LeftPanel.cpp
-    Src/Ui/RepoTab.cpp
-    Src/Ui/OutputView.cpp
-    Src/Ui/RichTextEditor.cpp
-    Src/Ui/HistoryPanel.cpp
-    Src/Core/CCProcess.cpp
-    Src/Core/StreamSimulator.cpp
-    Src/Data/Database.cpp
+    Sources/Main.cpp
+    Sources/MainWindow.cpp
+    Sources/Ui/LeftPanel.cpp
+    Sources/Ui/RepoTab.cpp
+    Sources/Ui/OutputView.cpp
+    Sources/Ui/RichTextEditor.cpp
+    Sources/Ui/HistoryPanel.cpp
+    Sources/Core/CCProcess.cpp
+    Sources/Core/StreamSimulator.cpp
+    Sources/Data/Database.cpp
 )
 
 set(HEADERS
-    Src/MainWindow.h
-    Src/Ui/LeftPanel.h
-    Src/Ui/RepoTab.h
-    Src/Ui/OutputView.h
-    Src/Ui/RichTextEditor.h
-    Src/Ui/HistoryPanel.h
-    Src/Core/CCProcess.h
-    Src/Core/StreamSimulator.h
-    Src/Data/Database.h
-    Src/Data/RepoInfo.h
-    Src/Data/SessionInfo.h
-    Src/Data/Message.h
+    Sources/MainWindow.h
+    Sources/Ui/LeftPanel.h
+    Sources/Ui/RepoTab.h
+    Sources/Ui/OutputView.h
+    Sources/Ui/RichTextEditor.h
+    Sources/Ui/HistoryPanel.h
+    Sources/Core/CCProcess.h
+    Sources/Core/StreamSimulator.h
+    Sources/Data/Database.h
+    Sources/Data/RepoInfo.h
+    Sources/Data/SessionInfo.h
+    Sources/Data/Message.h
 )
 
 qt_add_executable(CCTool
@@ -48,7 +54,7 @@ qt_add_executable(CCTool
     Resources/App.qrc
 )
 
-target_include_directories(CCTool PRIVATE Src)
+target_include_directories(CCTool PRIVATE Sources)
 
 target_link_libraries(CCTool
     PRIVATE

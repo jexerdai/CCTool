@@ -8,7 +8,7 @@
 CCProcess::CCProcess(QObject* parent) : QObject(parent)
 {
     m_process = new QProcess(this);
-    m_process->setProcessChannelMode(QProcess::MergedChannels);
+    m_process->setProcessChannelMode(QProcess::SeparateChannels);
 
     connect(m_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
             this, [this](int code, QProcess::ExitStatus) { onProcessFinished(code); });

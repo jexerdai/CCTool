@@ -26,8 +26,8 @@ cmake --build .
 ```
 CCTool/
 ├── CMakeLists.txt
-├── Src/
-│   ├── main.cpp
+├── Sources/
+│   ├── Main.cpp
 │   ├── MainWindow.h/.cpp       主窗口（QSplitter + QTabWidget）
 │   ├── Ui/                     纯 UI 组件层
 │   │   ├── LeftPanel           仓库列表面板
@@ -43,9 +43,11 @@ CCTool/
 │       ├── RepoInfo.h          仓库结构体
 │       ├── SessionInfo.h       会话结构体
 │       └── Message.h           消息结构体
-└── Resources/
-    ├── app.qrc
-    └── styles/main.qss         暗色主题样式
+├── Resources/
+│   ├── App.qrc
+│   └── Styles/Main.qss         暗色主题样式
+└── Scripts/
+    └── FixSln.ps1              修正 .sln 路径后输出到根目录
 ```
 
 ## 与 Claude Code 的通信方式

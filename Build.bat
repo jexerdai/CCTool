@@ -1,26 +1,22 @@
 @echo off
 setlocal
 
-:: ── 配置区 ────────────────────────────────────────────────────────────────
+:: --- Config (change Qt6 path to match your installation) ---
 set QT6_PATH=C:\Qt\6.10.2\msvc2022_64
-:: ─────────────────────────────────────────────────────────────────────────
+:: -----------------------------------------------------------
 
 set ROOT=%~dp0
 set PROJECT_FILES=%ROOT%Outputs\ProjectFiles
 
 echo [CCTool] Configuring...
-cmake -S "%ROOT%" -B "%PROJECT_FILES%" ^
-    -DCMAKE_PREFIX_PATH="%QT6_PATH%"
+cmake -S "%ROOT:~0,-1%" -B "%PROJECT_FILES%" -DCMAKE_PREFIX_PATH="%QT6_PATH%"
 if errorlevel 1 (
     echo [CCTool] CMake configuration FAILED.
     pause & exit /b 1
 )
 
-:: 将 .sln 复制到项目根目录
-if exist "%PROJECT_FILES%\CCTool.sln" (
-    copy /Y "%PROJECT_FILES%\CCTool.sln" "%ROOT%CCTool.sln" >nul
-    echo [CCTool] CCTool.sln copied to project root.
-)
+echo [CCTool] Generating CCTool.sln to project root...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%ROOT%Scripts\FixSln.ps1" -ProjectFiles "%PROJECT_FILES%" -Root "%ROOT:~0,-1%"
 
 echo [CCTool] Building...
 cmake --build "%PROJECT_FILES%" --config Release
