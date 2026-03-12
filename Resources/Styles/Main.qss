@@ -1,0 +1,145 @@
+/* CCTool Global Stylesheet */
+
+QMainWindow {
+    background-color: #1e1e2e;
+}
+
+/* Left Panel */
+#LeftPanel {
+    background-color: #181825;
+    border-right: 1px solid #313244;
+}
+
+#LeftPanel QListWidget {
+    background-color: #181825;
+    color: #cdd6f4;
+    border: none;
+    font-size: 13px;
+}
+
+#LeftPanel QListWidget::item {
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+#LeftPanel QListWidget::item:selected {
+    background-color: #313244;
+    color: #cdd6f4;
+}
+
+#LeftPanel QListWidget::item:hover {
+    background-color: #262637;
+}
+
+/* Tab Widget */
+QTabWidget::pane {
+    border: none;
+    background-color: #1e1e2e;
+}
+
+QTabBar::tab {
+    background-color: #181825;
+    color: #a6adc8;
+    padding: 8px 16px;
+    border: none;
+    border-right: 1px solid #313244;
+}
+
+QTabBar::tab:selected {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    border-top: 2px solid #89b4fa;
+}
+
+/* Output View */
+#OutputView {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    border: none;
+    font-family: "Cascadia Code", "Consolas", monospace;
+    font-size: 13px;
+    padding: 12px;
+}
+
+/* Rich Text Editor */
+#RichTextEditor {
+    background-color: #181825;
+    color: #cdd6f4;
+    border: 1px solid #313244;
+    border-radius: 6px;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 13px;
+    padding: 8px;
+}
+
+#RichTextEditor:focus {
+    border-color: #89b4fa;
+}
+
+/* History Panel */
+#HistoryPanel {
+    background-color: #181825;
+    border-left: 1px solid #313244;
+}
+
+#HistoryPanel QListWidget {
+    background-color: #181825;
+    color: #a6adc8;
+    border: none;
+    font-size: 12px;
+}
+
+#HistoryPanel QListWidget::item {
+    padding: 6px 10px;
+    border-bottom: 1px solid #262637;
+}
+
+#HistoryPanel QListWidget::item:selected {
+    background-color: #313244;
+    color: #cdd6f4;
+}
+
+/* Send Button */
+#SendButton {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 20px;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+#SendButton:hover {
+    background-color: #b4befe;
+}
+
+#SendButton:pressed {
+    background-color: #7287fd;
+}
+
+#SendButton:disabled {
+    background-color: #313244;
+    color: #6c7086;
+}
+
+/* Tool Bar in LeftPanel */
+#RepoToolBar {
+    background-color: #181825;
+    border-top: 1px solid #313244;
+    padding: 4px;
+}
+
+QPushButton#AddRepoBtn, QPushButton#RemoveRepoBtn {
+    background-color: transparent;
+    color: #a6adc8;
+    border: 1px solid #313244;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+QPushButton#AddRepoBtn:hover, QPushButton#RemoveRepoBtn:hover {
+    background-color: #313244;
+    color: #cdd6f4;
+}
