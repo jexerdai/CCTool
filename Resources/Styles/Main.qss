@@ -51,8 +51,8 @@ QTabBar::tab:selected {
     border-top: 2px solid #89b4fa;
 }
 
-/* Output View */
-#OutputView {
+/* Talk View */
+#TalkView {
     background-color: #1e1e2e;
     color: #cdd6f4;
     border: none;

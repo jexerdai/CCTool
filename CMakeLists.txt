@@ -25,7 +25,7 @@ set(SOURCES
     Sources/MainWindow.cpp
     Sources/Ui/LeftPanel.cpp
     Sources/Ui/RepoTab.cpp
-    Sources/Ui/OutputView.cpp
+    Sources/Ui/TalkView.cpp
     Sources/Ui/RichTextEditor.cpp
     Sources/Ui/HistoryPanel.cpp
     Sources/Ui/SessionPickerDialog.cpp
@@ -39,7 +39,7 @@ set(HEADERS
     Sources/MainWindow.h
     Sources/Ui/LeftPanel.h
     Sources/Ui/RepoTab.h
-    Sources/Ui/OutputView.h
+    Sources/Ui/TalkView.h
     Sources/Ui/RichTextEditor.h
     Sources/Ui/HistoryPanel.h
     Sources/Ui/SessionPickerDialog.h

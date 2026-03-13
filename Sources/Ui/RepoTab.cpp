@@ -1,5 +1,5 @@
 #include "RepoTab.h"
-#include "OutputView.h"
+#include "TalkView.h"
 #include "RichTextEditor.h"
 #include "SessionPickerDialog.h"
 #include "../Core/CCProcess.h"
@@ -59,7 +59,7 @@ void RepoTab::setupUi()
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    m_outputView = new OutputView(this);
+    m_outputView = new TalkView(this);
     mainLayout->addWidget(m_outputView, 1);
 
     auto* inputWidget = new QWidget(this);

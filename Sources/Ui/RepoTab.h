@@ -2,7 +2,7 @@
 #include <QWidget>
 #include "Data/RepoInfo.h"
 
-class OutputView;
+class TalkView;
 class RichTextEditor;
 class CCProcess;
 class CCSessionReader;
@@ -40,7 +40,7 @@ private:
     RepoInfo        m_repo;
     QString         m_currentSessionId;
 
-    OutputView*       m_outputView;
+    TalkView*         m_outputView;
     RichTextEditor*   m_editor;
     QPushButton*      m_sendBtn;
     QLabel*           m_statusLabel;

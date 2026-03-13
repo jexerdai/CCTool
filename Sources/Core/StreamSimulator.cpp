@@ -1,5 +1,5 @@
 #include "StreamSimulator.h"
-#include "../Ui/OutputView.h"
+#include "../Ui/TalkView.h"
 #include <QTimer>
 
 StreamSimulator::StreamSimulator(QObject* parent) : QObject(parent)
@@ -13,7 +13,7 @@ StreamSimulator::~StreamSimulator()
     m_timer->stop();
 }
 
-void StreamSimulator::start(OutputView* view, const QString& fullText, int intervalMs)
+void StreamSimulator::start(TalkView* view, const QString& fullText, int intervalMs)
 {
     m_timer->stop();
     m_view  = view;

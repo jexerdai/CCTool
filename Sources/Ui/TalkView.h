@@ -1,11 +1,11 @@
 #pragma once
 #include <QTextBrowser>
 
-class OutputView : public QTextBrowser
+class TalkView : public QTextBrowser
 {
     Q_OBJECT
 public:
-    explicit OutputView(QWidget* parent = nullptr);
+    explicit TalkView(QWidget* parent = nullptr);
 
     void appendUserMessage(const QString& text);
     void beginAssistantMessage();                  // 开启流式助手气泡

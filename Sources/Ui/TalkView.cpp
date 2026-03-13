@@ -1,9 +1,9 @@
-#include "OutputView.h"
+#include "TalkView.h"
 #include <QScrollBar>
 
-OutputView::OutputView(QWidget* parent) : QTextBrowser(parent)
+TalkView::TalkView(QWidget* parent) : QTextBrowser(parent)
 {
-    setObjectName("OutputView");
+    setObjectName("TalkView");
     setReadOnly(true);
     setOpenLinks(false);
     document()->setDefaultStyleSheet(
@@ -17,7 +17,7 @@ OutputView::OutputView(QWidget* parent) : QTextBrowser(parent)
     );
 }
 
-void OutputView::appendUserMessage(const QString& text)
+void TalkView::appendUserMessage(const QString& text)
 {
     m_assistantBlockOpen = false;
     QString escaped = text.toHtmlEscaped().replace("\n", "<br/>");
@@ -29,7 +29,7 @@ void OutputView::appendUserMessage(const QString& text)
     );
 }
 
-void OutputView::beginAssistantMessage()
+void TalkView::beginAssistantMessage()
 {
     m_assistantBlockOpen = true;
     appendHtml(
@@ -38,7 +38,7 @@ void OutputView::beginAssistantMessage()
     );
 }
 
-void OutputView::appendAssistantChunk(const QString& chunk)
+void TalkView::appendAssistantChunk(const QString& chunk)
 {
     if (!m_assistantBlockOpen) return;
     QTextCursor cursor = textCursor();
@@ -48,7 +48,7 @@ void OutputView::appendAssistantChunk(const QString& chunk)
     verticalScrollBar()->setValue(verticalScrollBar()->maximum());
 }
 
-void OutputView::endAssistantMessage()
+void TalkView::endAssistantMessage()
 {
     if (!m_assistantBlockOpen) return;
     QTextCursor cursor = textCursor();
@@ -59,7 +59,7 @@ void OutputView::endAssistantMessage()
     verticalScrollBar()->setValue(verticalScrollBar()->maximum());
 }
 
-void OutputView::appendAssistantMessage(const QString& text)
+void TalkView::appendAssistantMessage(const QString& text)
 {
     m_assistantBlockOpen = false;
     QString escaped = text.toHtmlEscaped().replace("\n", "<br/>");
@@ -71,30 +71,30 @@ void OutputView::appendAssistantMessage(const QString& text)
     );
 }
 
-void OutputView::appendStepInfo(const QString& text)
+void TalkView::appendStepInfo(const QString& text)
 {
     QString escaped = text.toHtmlEscaped();
     appendHtml("<div class='bubble-step'><span class='step'>● " + escaped + "</span></div>");
 }
 
-void OutputView::appendSteps(const QStringList& steps)
+void TalkView::appendSteps(const QStringList& steps)
 {
     for (const QString& s : steps)
         appendStepInfo(s);
 }
 
-void OutputView::scrollToBottom()
+void TalkView::scrollToBottom()
 {
     verticalScrollBar()->setValue(verticalScrollBar()->maximum());
 }
 
-void OutputView::clear()
+void TalkView::clear()
 {
     QTextBrowser::clear();
     m_assistantBlockOpen = false;
 }
 
-void OutputView::appendHtml(const QString& html)
+void TalkView::appendHtml(const QString& html)
 {
     QTextCursor cursor = textCursor();
     cursor.movePosition(QTextCursor::End);
