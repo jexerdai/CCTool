@@ -215,6 +215,6 @@ void RepoTab::loadSession(const QString& sessionId)
 
     // 延迟滚动到底部，确保渲染完成后再执行
     QTimer::singleShot(50, m_outputView, [this]() {
-        m_outputView->verticalScrollBar()->setValue(m_outputView->verticalScrollBar()->maximum());
+        m_outputView->scrollToBottom();
     });
 }

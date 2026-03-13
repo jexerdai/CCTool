@@ -25,14 +25,7 @@ void StreamSimulator::start(TalkView* view, const QString& fullText, int interva
         return;
     }
 
-    // 插入"Claude:"前缀行，后续 appendAssistantChunk 直接追加
-    m_view->appendHtml(
-        "<div style='background:#262637;border-radius:8px;"
-        "padding:10px;margin:6px 0;color:#cdd6f4;'>"
-        "<b style='color:#a6e3a1;'>Claude</b><br>"
-        "</div>"
-    );
-
+    m_view->beginAssistantMessage();
     m_timer->start(intervalMs);
 }
 

@@ -1,23 +1,37 @@
 #pragma once
-#include <QTextBrowser>
+#include <QScrollArea>
+#include <QVBoxLayout>
+#include <QLabel>
 
-class TalkView : public QTextBrowser
+class QScrollArea;
+class QWidget;
+class QVBoxLayout;
+
+class TalkView : public QScrollArea
 {
     Q_OBJECT
 public:
     explicit TalkView(QWidget* parent = nullptr);
 
     void appendUserMessage(const QString& text);
-    void beginAssistantMessage();                  // 开启流式助手气泡
-    void appendAssistantChunk(const QString& chunk); // 流式追加文本块
-    void endAssistantMessage();                    // 结束流式助手气泡
-    void appendAssistantMessage(const QString& text); // 历史回溯用（完整消息）
+    void beginAssistantMessage();
+    void appendAssistantChunk(const QString& chunk);
+    void endAssistantMessage();
+    void appendAssistantMessage(const QString& text);
     void appendStepInfo(const QString& text);
     void appendSteps(const QStringList& steps);
     void scrollToBottom();
     void clear();
-    void appendHtml(const QString& html);
+
+    // kept for compatibility (no-op for QScrollArea based impl)
+    void appendHtml(const QString&) {}
 
 private:
-    bool m_assistantBlockOpen = false;
+    QWidget*     m_container;
+    QVBoxLayout* m_layout;
+    QLabel*      m_streamLabel = nullptr;  // 当前流式气泡
+
+    QLabel* makeBubble(const QString& text, bool isUser);
+    QLabel* makeStep(const QString& text);
+    void    scrollToBottomDeferred();
 };

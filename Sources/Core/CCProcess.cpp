@@ -31,11 +31,18 @@ CCProcess::~CCProcess()
 void CCProcess::applyCleanEnv()
 {
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    // 移除所有 CLAUDE* 变量，防止"nested session"检测触发
+    // 只移除 CLAUDE_CODE_* 和 CLAUDECODE* 变量，防止"nested session"检测触发
+    // 不移除 CLAUDE_API_KEY 等合法变量
     const QStringList keys = env.keys();
     for (const QString& key : keys) {
-        if (key.startsWith(QLatin1String("CLAUDE"), Qt::CaseInsensitive))
+        QString upper = key.toUpper();
+        if (upper == "CLAUDECODE" ||
+            upper.startsWith("CLAUDE_CODE_") ||
+            upper == "CLAUDECODE_SESSION_ID" ||
+            upper == "CLAUDE_CODE_SESSION_ID")
+        {
             env.remove(key);
+        }
     }
     m_process->setProcessEnvironment(env);
 }
@@ -65,10 +72,11 @@ void CCProcess::send(const QString& prompt,
     applyCleanEnv();
     m_process->setWorkingDirectory(repoPath);
 
-    QStringList args = { "-p", prompt, "--output-format", "stream-json" };
+    QStringList args = { "-p", prompt, "--output-format", "stream-json", "--verbose" };
     if (!ccSessionId.isEmpty())
         args << "--resume" << ccSessionId;
 
+    qDebug() << "[CCProcess] start:" << "claude" << args;
     m_process->start("claude", args);
 }
 
@@ -76,7 +84,9 @@ void CCProcess::onReadyRead()
 {
     if (m_mode == Mode::Init) return;
 
-    m_buffer += m_process->readAllStandardOutput();
+    QByteArray newData = m_process->readAllStandardOutput();
+    qDebug() << "[CCProcess] onReadyRead bytes:" << newData.size();
+    m_buffer += newData;
 
     // 按行处理，未结尾的行留在 buffer
     int newline;
@@ -93,24 +103,19 @@ void CCProcess::onReadyRead()
         QJsonObject obj = doc.object();
         QString type = obj.value("type").toString();
 
-        if (type == "content_block_delta") {
-            // 流式文本 delta
-            QString delta = obj.value("delta").toObject()
-                               .value("text").toString();
-            if (!delta.isEmpty()) {
-                m_fullContent += delta;
-                emit streamChunk(delta);
-            }
-        } else if (type == "result") {
-            m_lastSessionId = obj.value("session_id").toString();
-        } else if (type == "assistant") {
-            // 工具调用步骤
-            QStringList steps;
+        if (type == "assistant") {
             QJsonArray contentArr = obj.value("message").toObject()
                                        .value("content").toArray();
+            QStringList steps;
+            QString textChunk;
+
             for (const QJsonValue& v : contentArr) {
                 QJsonObject block = v.toObject();
-                if (block.value("type").toString() == "tool_use") {
+                QString blockType = block.value("type").toString();
+
+                if (blockType == "text") {
+                    textChunk += block.value("text").toString();
+                } else if (blockType == "tool_use") {
                     QString toolName = block.value("name").toString();
                     QJsonObject input = block.value("input").toObject();
                     QString desc = toolName;
@@ -121,8 +126,26 @@ void CCProcess::onReadyRead()
                     steps.append(desc);
                 }
             }
+
+            if (!textChunk.isEmpty()) {
+                m_fullContent += textChunk;
+                emit streamChunk(textChunk);
+            }
             if (!steps.isEmpty())
                 emit streamSteps(steps);
+
+        } else if (type == "content_block_delta") {
+            // 兼容旧版 stream-json 格式
+            QString delta = obj.value("delta").toObject()
+                               .value("text").toString();
+            if (!delta.isEmpty()) {
+                m_fullContent += delta;
+                emit streamChunk(delta);
+            }
+        } else if (type == "result") {
+            m_lastSessionId = obj.value("session_id").toString();
+        } else if (type == "system") {
+            // 忽略 system 消息（hook events 等）
         }
     }
 }
@@ -133,14 +156,54 @@ void CCProcess::onProcessFinished(int exitCode)
     Mode finishedMode = m_mode;
     m_mode = Mode::Send;
 
+    // 进程结束时把剩余 stdout 全部读出来处理
+    QByteArray remaining = m_process->readAllStandardOutput();
+    if (!remaining.isEmpty()) {
+        qDebug() << "[CCProcess] remaining stdout on finish:" << remaining.size();
+        m_buffer += remaining;
+        // 触发一次解析
+        int newline;
+        while ((newline = m_buffer.indexOf('\n')) != -1) {
+            QByteArray line = m_buffer.left(newline).trimmed();
+            m_buffer = m_buffer.mid(newline + 1);
+            if (line.isEmpty()) continue;
+            QJsonParseError err;
+            QJsonDocument doc = QJsonDocument::fromJson(line, &err);
+            if (err.error != QJsonParseError::NoError || !doc.isObject()) continue;
+            QJsonObject obj = doc.object();
+            QString type = obj.value("type").toString();
+            if (type == "assistant") {
+                QJsonArray arr = obj.value("message").toObject().value("content").toArray();
+                for (const QJsonValue& v : arr) {
+                    QJsonObject block = v.toObject();
+                    if (block.value("type").toString() == "text") {
+                        QString t = block.value("text").toString();
+                        if (!t.isEmpty()) { m_fullContent += t; emit streamChunk(t); }
+                    }
+                }
+            } else if (type == "result") {
+                m_lastSessionId = obj.value("session_id").toString();
+            }
+        }
+    }
+
+    QString errText = QString::fromUtf8(m_process->readAllStandardError());
+    qDebug() << "[CCProcess] finished exitCode:" << exitCode << "mode:" << (int)finishedMode;
+    if (!errText.isEmpty()) qDebug() << "[CCProcess] stderr:" << errText;
+
     if (exitCode != 0) {
-        QString errText = QString::fromUtf8(m_process->readAllStandardError());
         emit errorOccurred(errText.isEmpty() ? QString("进程退出码: %1").arg(exitCode) : errText);
         return;
     }
 
     if (finishedMode == Mode::Init) {
         emit initFinished();
+        return;
+    }
+
+    // stderr 有内容但 exit==0 时也显示（claude 有时把错误写到 stderr 但不设非零退出码）
+    if (m_fullContent.isEmpty() && !errText.isEmpty()) {
+        emit errorOccurred(errText);
         return;
     }
 
