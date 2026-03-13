@@ -13,10 +13,13 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
+    bool eventFilter(QObject* obj, QEvent* event) override;
+
 private slots:
     void onRepoOpenRequested(const RepoInfo& repo);
     void onRepoRemoveRequested(int repoId);
     void onTabCloseRequested(int index);
+    void onCurrentTabChanged(int index);
 
 private:
     void setupUi();

@@ -1,10 +1,26 @@
-# 编译产物
-CCTool.exe
+# 编译产物（根目录）
 CCTool.sln
 *.obj
 *.o
 
-# 编译输出目录（保留目录结构但忽略内容）
+# Binaries/ — 忽略所有编译产物，只跟踪目录
+Binaries/*.exe
+Binaries/*.dll
+Binaries/*.lib
+Binaries/*.pdb
+Binaries/*.exp
+Binaries/platforms/
+Binaries/iconengines/
+Binaries/imageformats/
+Binaries/networkinformation/
+Binaries/sqldrivers/
+Binaries/styles/
+Binaries/tls/
+Binaries/translations/
+Binaries/generic/
+Binaries/x64/
+
+# Outputs/ — 全部忽略
 Outputs/ProjectFiles/
 Outputs/Release/
 Outputs/Debug/

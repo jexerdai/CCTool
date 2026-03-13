@@ -37,10 +37,13 @@ bool Database::createTables()
     QSqlQuery q;
     const QStringList ddl = {
         R"(CREATE TABLE IF NOT EXISTS repos (
-            id         INTEGER PRIMARY KEY AUTOINCREMENT,
-            name       TEXT NOT NULL,
-            path       TEXT NOT NULL UNIQUE,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            name            TEXT NOT NULL,
+            path            TEXT NOT NULL UNIQUE,
+            last_session_id TEXT,
+            is_open         INTEGER DEFAULT 0,
+            last_active_at  DATETIME,
+            created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
         ))",
         R"(CREATE TABLE IF NOT EXISTS sessions (
             id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -65,6 +68,12 @@ bool Database::createTables()
             return false;
         }
     }
+
+    // 迁移：为旧 db 加新列（列已存在时 ALTER TABLE 会失败，忽略即可）
+    q.exec("ALTER TABLE repos ADD COLUMN last_session_id TEXT");
+    q.exec("ALTER TABLE repos ADD COLUMN is_open INTEGER DEFAULT 0");
+    q.exec("ALTER TABLE repos ADD COLUMN last_active_at DATETIME");
+
     return true;
 }
 
@@ -95,15 +104,54 @@ bool Database::removeRepo(int repoId)
 QList<RepoInfo> Database::listRepos()
 {
     QList<RepoInfo> list;
-    QSqlQuery q("SELECT id, name, path FROM repos ORDER BY created_at ASC");
+    QSqlQuery q("SELECT id, name, path, last_session_id, is_open, last_active_at FROM repos ORDER BY created_at ASC");
     while (q.next()) {
         RepoInfo r;
-        r.id   = q.value(0).toInt();
-        r.name = q.value(1).toString();
-        r.path = q.value(2).toString();
+        r.id            = q.value(0).toInt();
+        r.name          = q.value(1).toString();
+        r.path          = q.value(2).toString();
+        r.lastSessionId = q.value(3).toString();
+        r.isOpen        = q.value(4).toInt() != 0;
+        r.lastActiveAt  = QDateTime::fromString(q.value(5).toString(), "yyyy-MM-dd hh:mm:ss");
+        if (!r.lastActiveAt.isValid())
+            r.lastActiveAt = q.value(5).toDateTime();
         list.append(r);
     }
     return list;
+}
+
+bool Database::saveLastSessionId(int repoId, const QString& sessionId)
+{
+    QSqlQuery q;
+    q.prepare("UPDATE repos SET last_session_id = ? WHERE id = ?");
+    q.addBindValue(sessionId);
+    q.addBindValue(repoId);
+    return q.exec();
+}
+
+bool Database::setRepoOpen(int repoId, bool open)
+{
+    QSqlQuery q;
+    q.prepare("UPDATE repos SET is_open = ? WHERE id = ?");
+    q.addBindValue(open ? 1 : 0);
+    q.addBindValue(repoId);
+    return q.exec();
+}
+
+bool Database::setRepoLastActive(int repoId)
+{
+    QSqlQuery q;
+    q.prepare("UPDATE repos SET last_active_at = CURRENT_TIMESTAMP WHERE id = ?");
+    q.addBindValue(repoId);
+    return q.exec();
+}
+
+int Database::lastActiveRepoId()
+{
+    QSqlQuery q("SELECT id FROM repos WHERE is_open = 1 ORDER BY last_active_at DESC LIMIT 1");
+    if (q.exec() && q.next())
+        return q.value(0).toInt();
+    return -1;
 }
 
 // ── 会话 ────────────────────────────────────────────────────────────────────

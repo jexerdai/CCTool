@@ -1,5 +1,5 @@
 #include "StreamSimulator.h"
-#include "Ui/OutputView.h"
+#include "../Ui/OutputView.h"
 #include <QTimer>
 
 StreamSimulator::StreamSimulator(QObject* parent) : QObject(parent)

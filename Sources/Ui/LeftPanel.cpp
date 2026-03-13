@@ -5,7 +5,9 @@
 #include <QHBoxLayout>
 #include <QFileDialog>
 #include <QDir>
+#include <QFile>
 #include <QMessageBox>
+#include <QTextStream>
 
 LeftPanel::LeftPanel(QWidget* parent) : QWidget(parent)
 {
@@ -74,6 +76,30 @@ void LeftPanel::onAddClicked()
         this, "选择仓库目录", QDir::homePath(),
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (dir.isEmpty()) return;
+
+    // 检查是否为 Claude 仓库（存在 CLAUDE.md）
+    if (!QFile::exists(dir + "/CLAUDE.md")) {
+        auto btn = QMessageBox::question(this, "不是 Claude 仓库",
+            QString("目录 \"%1\" 中未找到 CLAUDE.md。\n\n是否在此目录初始化一个 Claude 仓库？")
+                .arg(QDir::toNativeSeparators(dir)),
+            QMessageBox::Yes | QMessageBox::No);
+
+        if (btn != QMessageBox::Yes) return;
+
+        // 创建空的 CLAUDE.md
+        QFile f(dir + "/CLAUDE.md");
+        if (f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QTextStream out(&f);
+            out << "# CLAUDE.md\n\n"
+                << "This file provides guidance to Claude Code (claude.ai/code) "
+                << "when working with code in this repository.\n";
+            f.close();
+        } else {
+            QMessageBox::warning(this, "初始化失败",
+                "无法创建 CLAUDE.md，请检查目录权限。");
+            return;
+        }
+    }
 
     RepoInfo repo;
     repo.name = QDir(dir).dirName();

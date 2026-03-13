@@ -8,14 +8,16 @@ public:
     explicit OutputView(QWidget* parent = nullptr);
 
     void appendUserMessage(const QString& text);
-    void appendAssistantChunk(const QString& chunk);   // 用于 StreamSimulator 逐字追加
-    void appendAssistantMessage(const QString& text);  // 直接追加完整消息
-    void appendStepInfo(const QString& text);          // 灰色显示工具调用步骤
+    void beginAssistantMessage();                  // 开启流式助手气泡
+    void appendAssistantChunk(const QString& chunk); // 流式追加文本块
+    void endAssistantMessage();                    // 结束流式助手气泡
+    void appendAssistantMessage(const QString& text); // 历史回溯用（完整消息）
+    void appendStepInfo(const QString& text);
     void appendSteps(const QStringList& steps);
+    void scrollToBottom();
     void clear();
-
-    void appendHtml(const QString& html);   // StreamSimulator 也需要调用
+    void appendHtml(const QString& html);
 
 private:
-    bool m_assistantBlockOpen = false;  // 是否正在追加助手消息块
+    bool m_assistantBlockOpen = false;
 };

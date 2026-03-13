@@ -1,8 +1,7 @@
 #pragma once
 #include <QWidget>
 #include <QList>
-#include "Data/SessionInfo.h"
-#include "Data/Message.h"
+#include "../Core/CCSessionReader.h"
 
 class QListWidget;
 class QListWidgetItem;
@@ -14,11 +13,10 @@ class HistoryPanel : public QWidget
 public:
     explicit HistoryPanel(QWidget* parent = nullptr);
 
-    void loadSessions(const QList<SessionInfo>& sessions);
-    void addSession(const SessionInfo& session);
+    void loadSessions(const QList<CCSession>& sessions);
 
 signals:
-    void sessionSelected(int sessionId);
+    void sessionSelected(const QString& sessionId);
 
 private slots:
     void onItemClicked(QListWidgetItem* item);

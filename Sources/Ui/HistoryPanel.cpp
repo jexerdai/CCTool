@@ -27,26 +27,21 @@ void HistoryPanel::setupUi()
     connect(m_list, &QListWidget::itemClicked, this, &HistoryPanel::onItemClicked);
 }
 
-void HistoryPanel::loadSessions(const QList<SessionInfo>& sessions)
+void HistoryPanel::loadSessions(const QList<CCSession>& sessions)
 {
     m_list->clear();
-    for (const auto& s : sessions)
-        addSession(s);
-}
-
-void HistoryPanel::addSession(const SessionInfo& session)
-{
-    auto* item = new QListWidgetItem(m_list);
-    QString label = session.createdAt.toString("MM-dd hh:mm");
-    if (label.isEmpty()) label = "新会话";
-    item->setText(label);
-    item->setData(Qt::UserRole, session.id);
-    item->setToolTip("Session: " + session.ccSessionId);
-    m_list->insertItem(0, item);   // 最新的排在最上面
+    for (const auto& s : sessions) {
+        auto* item = new QListWidgetItem(m_list);
+        QString timeStr = s.createdAt.toLocalTime().toString("MM-dd hh:mm");
+        QString preview = s.firstMessage.isEmpty() ? "(无消息)" : s.firstMessage;
+        item->setText(timeStr + "\n" + preview);
+        item->setData(Qt::UserRole, s.sessionId);
+        item->setToolTip(s.sessionId);
+    }
 }
 
 void HistoryPanel::onItemClicked(QListWidgetItem* item)
 {
     if (!item) return;
-    emit sessionSelected(item->data(Qt::UserRole).toInt());
+    emit sessionSelected(item->data(Qt::UserRole).toString());
 }

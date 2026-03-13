@@ -1,13 +1,11 @@
 #pragma once
 #include <QWidget>
 #include "Data/RepoInfo.h"
-#include "Data/SessionInfo.h"
 
 class OutputView;
 class RichTextEditor;
-class HistoryPanel;
 class CCProcess;
-class StreamSimulator;
+class CCSessionReader;
 
 class QSplitter;
 class QPushButton;
@@ -17,35 +15,36 @@ class RepoTab : public QWidget
 {
     Q_OBJECT
 public:
-    explicit RepoTab(const RepoInfo& repo, QWidget* parent = nullptr);
+    explicit RepoTab(const RepoInfo& repo, QWidget* parent = nullptr, bool autoPickSession = true);
     ~RepoTab();
 
     const RepoInfo& repoInfo() const { return m_repo; }
 
-    // 加载历史会话消息到 OutputView（只读回溯）
-    void loadSession(int sessionId);
+    void loadSession(const QString& sessionId);
+    void showSessionPicker();   // 双击 Tab 时弹出 Session 选择框
 
 private slots:
+    void onInitFinished();
+    void promptSessionPick();
     void onSendClicked();
     void onSubmitted(const QString& text);
-    void onResponseReady(const QString& content, const QString& newCCSessionId, const QStringList& steps);
+    void onStreamChunk(const QString& text);
+    void onStreamSteps(const QStringList& steps);
+    void onResponseFinished(const QString& fullContent, const QString& newSessionId);
     void onCCError(const QString& error);
-    void onStreamFinished();
-    void onSessionSelected(int sessionId);
 
 private:
     void setupUi();
     void setInputEnabled(bool enabled);
 
     RepoInfo        m_repo;
-    SessionInfo     m_currentSession;
+    QString         m_currentSessionId;
 
-    OutputView*     m_outputView;
-    RichTextEditor* m_editor;
-    HistoryPanel*   m_historyPanel;
-    QPushButton*    m_sendBtn;
-    QLabel*         m_statusLabel;
+    OutputView*       m_outputView;
+    RichTextEditor*   m_editor;
+    QPushButton*      m_sendBtn;
+    QLabel*           m_statusLabel;
 
-    CCProcess*      m_ccProcess;
-    StreamSimulator* m_streamSim;
+    CCProcess*        m_ccProcess;
+    CCSessionReader*  m_sessionReader;
 };

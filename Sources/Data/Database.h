@@ -19,6 +19,10 @@ public:
     bool          addRepo(RepoInfo& repo);
     bool          removeRepo(int repoId);
     QList<RepoInfo> listRepos();
+    bool          saveLastSessionId(int repoId, const QString& sessionId);
+    bool          setRepoOpen(int repoId, bool open);
+    bool          setRepoLastActive(int repoId);
+    int           lastActiveRepoId();
 
     // 会话
     SessionInfo   createSession(int repoId);

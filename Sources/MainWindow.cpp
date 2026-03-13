@@ -5,12 +5,14 @@
 
 #include <QSplitter>
 #include <QTabWidget>
+#include <QTabBar>
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
 #include <QApplication>
 #include <QFile>
 #include <QMessageBox>
+#include <QMouseEvent>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
@@ -51,6 +53,14 @@ void MainWindow::setupUi()
             this, &MainWindow::onRepoRemoveRequested);
     connect(m_tabWidget, &QTabWidget::tabCloseRequested,
             this, &MainWindow::onTabCloseRequested);
+    connect(m_tabWidget, &QTabWidget::currentChanged,
+            this, &MainWindow::onCurrentTabChanged);
+    m_tabWidget->tabBar()->installEventFilter(this);
+    connect(m_tabWidget->tabBar(), &QTabBar::tabBarDoubleClicked,
+            this, [this](int index) {
+                auto* tab = qobject_cast<RepoTab*>(m_tabWidget->widget(index));
+                if (tab) tab->showSessionPicker();
+            });
 }
 
 void MainWindow::setupMenuBar()
@@ -89,6 +99,21 @@ void MainWindow::loadSavedRepos()
 {
     auto repos = Database::instance().listRepos();
     m_leftPanel->loadRepos(repos);
+
+    // 恢复上次打开的 Tab，按 last_active_at 排序（数据库已按 created_at ASC 返回）
+    // 用 repo id 比较找最后激活的
+    int lastActiveRepoId = Database::instance().lastActiveRepoId();
+    int lastActiveIdx = -1;
+
+    for (const RepoInfo& repo : repos) {
+        if (!repo.isOpen) continue;
+        auto* tab = new RepoTab(repo, m_tabWidget, false);
+        int idx = m_tabWidget->addTab(tab, repo.name);
+        if (repo.id == lastActiveRepoId)
+            lastActiveIdx = idx;
+    }
+    if (lastActiveIdx >= 0)
+        m_tabWidget->setCurrentIndex(lastActiveIdx);
 }
 
 void MainWindow::onRepoOpenRequested(const RepoInfo& repoArg)
@@ -114,6 +139,8 @@ void MainWindow::onRepoOpenRequested(const RepoInfo& repoArg)
     auto* tab = new RepoTab(repo, m_tabWidget);
     int idx = m_tabWidget->addTab(tab, repo.name);
     m_tabWidget->setCurrentIndex(idx);
+    Database::instance().setRepoOpen(repo.id, true);
+    Database::instance().setRepoLastActive(repo.id);
 }
 
 void MainWindow::onRepoRemoveRequested(int repoId)
@@ -129,9 +156,33 @@ void MainWindow::onRepoRemoveRequested(int repoId)
 
 void MainWindow::onTabCloseRequested(int index)
 {
-    QWidget* w = m_tabWidget->widget(index);
+    auto* tab = qobject_cast<RepoTab*>(m_tabWidget->widget(index));
+    if (tab)
+        Database::instance().setRepoOpen(tab->repoInfo().id, false);
     m_tabWidget->removeTab(index);
-    delete w;
+    delete tab;
+}
+
+void MainWindow::onCurrentTabChanged(int index)
+{
+    auto* tab = qobject_cast<RepoTab*>(m_tabWidget->widget(index));
+    if (tab && tab->repoInfo().id >= 0)
+        Database::instance().setRepoLastActive(tab->repoInfo().id);
+}
+
+bool MainWindow::eventFilter(QObject* obj, QEvent* event)
+{
+    if (obj == m_tabWidget->tabBar() && event->type() == QEvent::MouseButtonDblClick) {
+        auto* me = static_cast<QMouseEvent*>(event);
+        int index = m_tabWidget->tabBar()->tabAt(me->pos());
+        if (index >= 0) {
+            auto* tab = qobject_cast<RepoTab*>(m_tabWidget->widget(index));
+            if (tab)
+                tab->showSessionPicker();
+        }
+        return true;
+    }
+    return QMainWindow::eventFilter(obj, event);
 }
 
 RepoTab* MainWindow::findTabByRepoId(int repoId)

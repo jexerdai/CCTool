@@ -20,12 +20,54 @@ OutputView::OutputView(QWidget* parent) : QTextBrowser(parent)
 void OutputView::appendUserMessage(const QString& text)
 {
     m_assistantBlockOpen = false;
-    QString escaped = text.toHtmlEscaped().replace("\n", "<br>");
+    QString escaped = text.toHtmlEscaped().replace("\n", "<br/>");
     appendHtml(
         "<div class='bubble-user'>"
-        "<span class='user'>You</span><br>"
+        "<span class='user'>You</span><br/>"
         "<span>" + escaped + "</span>"
         "</div>"
+    );
+}
+
+void OutputView::beginAssistantMessage()
+{
+    m_assistantBlockOpen = true;
+    appendHtml(
+        "<div class='bubble-assistant'>"
+        "<span class='assistant'><b style='color:#a6e3a1;'>Claude</b><br/>"
+    );
+}
+
+void OutputView::appendAssistantChunk(const QString& chunk)
+{
+    if (!m_assistantBlockOpen) return;
+    QTextCursor cursor = textCursor();
+    cursor.movePosition(QTextCursor::End);
+    setTextCursor(cursor);
+    insertHtml(chunk.toHtmlEscaped().replace("\n", "<br/>"));
+    verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+}
+
+void OutputView::endAssistantMessage()
+{
+    if (!m_assistantBlockOpen) return;
+    QTextCursor cursor = textCursor();
+    cursor.movePosition(QTextCursor::End);
+    setTextCursor(cursor);
+    insertHtml("</span></div>");
+    m_assistantBlockOpen = false;
+    verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+}
+
+void OutputView::appendAssistantMessage(const QString& text)
+{
+    m_assistantBlockOpen = false;
+    QString escaped = text.toHtmlEscaped().replace("\n", "<br/>");
+    appendHtml(
+        "<div class='bubble-assistant'>"
+        "<span class='assistant'><b style='color:#a6e3a1;'>Claude</b><br/>"
+        + escaped +
+        "</span></div>"
     );
 }
 
@@ -41,25 +83,8 @@ void OutputView::appendSteps(const QStringList& steps)
         appendStepInfo(s);
 }
 
-void OutputView::appendAssistantMessage(const QString& text)
+void OutputView::scrollToBottom()
 {
-    m_assistantBlockOpen = false;
-    QString escaped = text.toHtmlEscaped().replace("\n", "<br>");
-    appendHtml(
-        "<div class='bubble-assistant'>"
-        "<span class='assistant'>" + escaped + "</span>"
-        "</div>"
-    );
-}
-
-// StreamSimulator 调用此方法逐字追加
-void OutputView::appendAssistantChunk(const QString& chunk)
-{
-    // 移动光标到末尾，直接插入纯文本以保留格式
-    QTextCursor cursor = textCursor();
-    cursor.movePosition(QTextCursor::End);
-    setTextCursor(cursor);
-    insertPlainText(chunk);
     verticalScrollBar()->setValue(verticalScrollBar()->maximum());
 }
 

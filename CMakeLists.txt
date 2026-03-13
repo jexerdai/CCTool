@@ -7,16 +7,16 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-# 可执行文件输出到项目根目录（MSVC 多配置生成器需要单独指定每个配置）
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR})
+# 可执行文件输出到 Binaries/（MSVC 多配置生成器需要单独指定每个配置）
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Binaries)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Binaries)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Binaries)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/Binaries)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/Binaries)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/Binaries)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/Binaries)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/Binaries)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/Binaries)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Sql)
 
@@ -28,7 +28,9 @@ set(SOURCES
     Sources/Ui/OutputView.cpp
     Sources/Ui/RichTextEditor.cpp
     Sources/Ui/HistoryPanel.cpp
+    Sources/Ui/SessionPickerDialog.cpp
     Sources/Core/CCProcess.cpp
+    Sources/Core/CCSessionReader.cpp
     Sources/Core/StreamSimulator.cpp
     Sources/Data/Database.cpp
 )
@@ -40,7 +42,9 @@ set(HEADERS
     Sources/Ui/OutputView.h
     Sources/Ui/RichTextEditor.h
     Sources/Ui/HistoryPanel.h
+    Sources/Ui/SessionPickerDialog.h
     Sources/Core/CCProcess.h
+    Sources/Core/CCSessionReader.h
     Sources/Core/StreamSimulator.h
     Sources/Data/Database.h
     Sources/Data/RepoInfo.h
